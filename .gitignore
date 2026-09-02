@@ -1,5 +1,6 @@
 # Built application files
 *.apk
+!downloads/app-foss-debug.apk
 *.aar
 *.ap_
 *.aab
@@ -107,11 +108,5 @@ app/src/main/java/com/metrolist/music/listentogether/proto/*
 .build-fftw
 app/src/main/cpp/coverart/
 
-# Agents dir
-.claude
-.antigravity*
-.gemini
-.opencode
-.cursor*
-.codeium
-.cortexkit
+# Internal development notes (moved to notes/ submodule)
+.spotify_gql_endpoints.json
