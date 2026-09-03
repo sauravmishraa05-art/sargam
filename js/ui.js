@@ -295,6 +295,74 @@ const UI = {
       .replace(/"/g, '&quot;');
   },
 
+  // Web Share API & Clipboard Fallback Implementation
+  async shareSargam() {
+    const shareData = {
+      title: 'Sargam Web',
+      text: 'Sargam \u2013 Music for everyone \uD83C\uDFB5\nHindi \u2022 Bhojpuri \u2022 Haryanvi \u2022 Punjabi \u2022 English & more',
+      url: 'https://sauravmishraa05-art.github.io/sargam/'
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          this.copyShareLinkToClipboard();
+        }
+      }
+    } else {
+      this.copyShareLinkToClipboard();
+    }
+  },
+
+  copyShareLinkToClipboard() {
+    const urlToCopy = 'https://sauravmishraa05-art.github.io/sargam/';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(urlToCopy).then(() => {
+        this.showToast('Link copied to clipboard!');
+      }).catch(() => {
+        this.fallbackCopyTextToClipboard(urlToCopy);
+      });
+    } else {
+      this.fallbackCopyTextToClipboard(urlToCopy);
+    }
+  },
+
+  fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      this.showToast('Link copied to clipboard!');
+    } catch (err) {
+      this.showToast('https://sauravmishraa05-art.github.io/sargam/');
+    }
+    document.body.removeChild(textArea);
+  },
+
+  showToast(msg) {
+    let toast = document.getElementById('toast-notification');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toast-notification';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  },
+
   setupEventListeners() {
     // Navigation items click
     document.querySelectorAll('[data-view]').forEach(item => {
@@ -302,6 +370,15 @@ const UI = {
         e.preventDefault();
         const view = item.getAttribute('data-view');
         this.switchView(view);
+      });
+    });
+
+    // Share buttons click
+    document.querySelectorAll('.btn-share-action').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.shareSargam();
       });
     });
 
